@@ -30,12 +30,13 @@
  * @license MIT License
  */
 
-#include <Arduino.h>
+//#include <Arduino.h>
 
 // PLEASE NOTE!
 // The Arduino IDE is a bit braindead, even though we include Wire.h here, it does nothing
 // you must include Wire.h in your main sketch, the Arduino IDE will not include Wire
 // in the build process otherwise.
+#include <Arduino.h>
 #include <Wire.h>
 #include "HMC5883L_Simple.h"
 
@@ -45,9 +46,7 @@ HMC5883L_Simple::HMC5883L_Simple()
   mode = COMPASS_SINGLE | COMPASS_SCALE_130 | COMPASS_HORIZONTAL_X_NORTH;
   i2c_address = COMPASS_I2C_ADDRESS; // NB: The HMC5883L does not appear to be able to have any different address.
                                      //     so this is a bit moot.
-}
-HMC5883L_Simple::HMC5883L_Simple(const BotMovingManegement &_bmm):HMC5883L_Simple(){
-  bmm = _bmm;  
+  zero_heading = 0;
 }
 
 /** Set declination in degrees, minutes and direction (E/W)
@@ -314,6 +313,7 @@ float HMC5883L_Simple::GetHeadingDegreesHQ(){
 
   // Convert radians to degrees for readability.
   last_heading= last_heading * 180 / M_PI;
+  last_heading = last_heading - zero_heading;
   return last_heading;
 }
 
@@ -335,4 +335,12 @@ float HMC5883L_Simple::getOmegaZ(){
     last_omega = MAX_OMEGA_DEG;
   }
   return last_omega;
+}
+
+void HMC5883L_Simple::setUpZeroHeading(){
+  zero_heading = GetHeadingDegreesHQ();    
+}
+
+float HMC5883L_Simple::getEps(){
+  return eps;
 }

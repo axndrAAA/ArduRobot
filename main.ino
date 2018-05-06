@@ -42,16 +42,18 @@
  * @license MIT License
  * 
  */
-
 #include <Arduino.h>
 #include <Wire.h>
-#include "HMC5883L_Simple.h"
 #include "botMovingManegment.h"
+#include "HMC5883L_Simple.h"
+
 
 // Create a compass
-BotMovingManegement bmm;
+HMC5883L_Simple Compass;
 
-HMC5883L_Simple Compass(bmm);
+BotMovingManegement bmm(Compass);
+
+
 
 void setup()
 {
@@ -97,7 +99,9 @@ void setup()
   //   COMPASS_VERTICAL_X_EAST,    vertically mounted (tall) looking at the top side, when facing North the X silkscreen arrow will point East
   //   COMPASS_VERTICAL_Y_WEST,    vertically mounted (wide) looking at the top side, when facing North the Y silkscreen arrow will point West  
   Compass.SetOrientation(COMPASS_HORIZONTAL_X_NORTH);
-  
+  Compass.setUpZeroHeading();
+
+  Serial.println("Ready.");
 }
 
 // Our main program loop.
@@ -106,6 +110,6 @@ void loop()
    float heading = Compass.GetHeadingDegreesHQ();
    Serial.print("Heading: \t");
    Serial.println( heading );   
-
+   //bmm.turnAngle(160);
    delay(1000);
 }

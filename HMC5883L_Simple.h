@@ -106,39 +106,43 @@
 #define COMPASS_VERTICAL_X_EAST     ( (COMPASS_EAST  << 6)  | (COMPASS_UP    << 3)  | COMPASS_SOUTH ) << 5
 #define COMPASS_VERTICAL_Y_WEST     ( (COMPASS_UP    << 6)  | (COMPASS_WEST  << 3)  | COMPASS_SOUTH ) << 5
 
-
-#include"botMovingManegment.h"
-
 class HMC5883L_Simple
 {
 	public:
 
     // Constructor
 	  HMC5883L_Simple();
-    HMC5883L_Simple(const BotMovingManegement &_bmm);
-  
+
     // Configuration Methods
     void SetScale( uint16_t sampling_mode );
     void SetOrientation( uint16_t sampling_mode );    
     void SetDeclination( int declination_degs , int declination_mins, char declination_dir );
     void SetSamplingMode( uint16_t sampling_mode );
+    void setUpZeroHeading();
     	  
     // Get a heading in degrees
     float GetHeadingDegrees();
     float GetHeadingDegreesHQ();
     float getOmegaZ();
+    float getEps();
+
+
+
   private:
     uint8_t  i2c_address;
     //corrected mag values
     float mag_X, mag_Y,mag_Z;
+
     //last measured heading in degr
     float last_heading;
     unsigned long last_measure_time;
+    //last measured omega
+    float last_omega;    
     //previous measured heading in degr
     float prev_heading;
     unsigned long prev_measure_time;
 
-    float last_omega;
+    float zero_heading;
 
     //max z-rotating speed
     float MAX_OMEGA_DEG = 10;
@@ -151,7 +155,7 @@ class HMC5883L_Simple
       int Y;
       int Z;
     };
-    BotMovingManegement &bmm;
+
     
     //calibration_matrix[3][3] is the transformation matrix
     float M11 = 1.024, M12 = 0.024, M13 = -0.019,
@@ -160,7 +164,7 @@ class HMC5883L_Simple
     //bias[3] is the bias
     float bias[3] = {    -36.147,    -76.359,    24.904  };
     //min delta right and left side
-    float eps = 5;
+    float eps = 7.0;
 
     
 	  void     Write(uint8_t address, uint8_t byte);
