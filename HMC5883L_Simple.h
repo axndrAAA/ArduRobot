@@ -106,12 +106,20 @@
 #define COMPASS_VERTICAL_X_EAST     ( (COMPASS_EAST  << 6)  | (COMPASS_UP    << 3)  | COMPASS_SOUTH ) << 5
 #define COMPASS_VERTICAL_Y_WEST     ( (COMPASS_UP    << 6)  | (COMPASS_WEST  << 3)  | COMPASS_SOUTH ) << 5
 
+
+//PID поворота
+#define MAX_PWM_VAL 255
+#define MAX_PID_VAL 45
+#define Kp 0.5
+#include"botMovingManegment.h"
+
 class HMC5883L_Simple
 {
 	public:
 
     // Constructor
 	  HMC5883L_Simple();
+    HMC5883L_Simple(const BotMovingManegement &_bmm);
 
     // Configuration Methods
     void SetScale( uint16_t sampling_mode );
@@ -119,6 +127,7 @@ class HMC5883L_Simple
     void SetDeclination( int declination_degs , int declination_mins, char declination_dir );
     void SetSamplingMode( uint16_t sampling_mode );
     void setUpZeroHeading();
+    void turnByAngle(int new_angle);
     	  
     // Get a heading in degrees
     float GetHeadingDegrees();
@@ -155,6 +164,8 @@ class HMC5883L_Simple
       int Y;
       int Z;
     };
+
+    BotMovingManegement &bmm;
 
     
     //calibration_matrix[3][3] is the transformation matrix

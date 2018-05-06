@@ -47,12 +47,10 @@
 #include "botMovingManegment.h"
 #include "HMC5883L_Simple.h"
 
-
+// Create a bot moving class
+BotMovingManegement bmm;
 // Create a compass
-HMC5883L_Simple Compass;
-
-BotMovingManegement bmm(Compass);
-
+HMC5883L_Simple Compass(bmm);
 
 
 void setup()
@@ -101,6 +99,8 @@ void setup()
   Compass.SetOrientation(COMPASS_HORIZONTAL_X_NORTH);
   Compass.setUpZeroHeading();
 
+
+  
   Serial.println("Ready.");
 }
 
@@ -110,6 +110,6 @@ void loop()
    float heading = Compass.GetHeadingDegreesHQ();
    Serial.print("Heading: \t");
    Serial.println( heading );   
-   //bmm.turnAngle(160);
+   Compass.turnByAngle(160);
    delay(1000);
 }

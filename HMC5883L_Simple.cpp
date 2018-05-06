@@ -49,6 +49,10 @@ HMC5883L_Simple::HMC5883L_Simple()
   zero_heading = 0;
 }
 
+
+HMC5883L_Simple::HMC5883L_Simple(const BotMovingManegement &_bmm):HMC5883L_Simple(){
+  bmm = _bmm;
+}
 /** Set declination in degrees, minutes and direction (E/W)
  *   See http://www.magnetic-declination.com/
  */
@@ -343,4 +347,70 @@ void HMC5883L_Simple::setUpZeroHeading(){
 
 float HMC5883L_Simple::getEps(){
   return eps;
+}
+
+
+void HMC5883L_Simple::turnByAngle(int new_angle){
+    float last_heading = GetHeadingDegreesHQ();
+  int delta = new_angle - last_heading;
+  if(abs(delta)<getEps()){
+    delta = 0;
+    return;
+  }
+  float pid_val = Kp*delta;
+
+    do{
+        //delay(500);      
+        last_heading = GetHeadingDegreesHQ();
+      
+        delta = new_angle - last_heading;
+        //  Serial.print("delta: \t");
+        //  Serial.println(delta);
+        if(abs(delta)<getEps()){
+            delta = 0;
+            break;
+        }
+        pid_val = Kp*abs(delta);
+        // Serial.print("PID: \t");
+        // Serial.println(pid_val);
+        map(pid_val,0,MAX_PID_VAL,0,MAX_PWM_VAL);
+        // Serial.print("PWM: \t");
+        // Serial.println(pid_val);
+        bmm.setV(pid_val);
+
+
+        if(delta < 0){
+          //влево    
+          if(-delta >= 180){
+            //все таки вправо
+              pid_val = Kp*abs(delta-360);
+              // Serial.print("PID: \t");
+              // Serial.println(pid_val);
+              map(pid_val,0,MAX_PID_VAL,0,MAX_PWM_VAL);
+              // Serial.print("PWM: \t");
+              // Serial.println(pid_val);
+              bmm.setV(pid_val);
+            bmm.turnRight();
+            continue;
+          }
+          bmm.turnLeft();
+        }else {
+            //вправо
+          if(delta >= 180){
+            //все таки влево
+            pid_val = Kp*abs(delta-360);
+            // Serial.print("PID: \t");
+            // Serial.println(pid_val);
+            map(pid_val,0,MAX_PID_VAL,0,MAX_PWM_VAL);
+            // Serial.print("PWM: \t");
+            // Serial.println(pid_val);
+            bmm.setV(pid_val);
+            bmm.turnLeft();
+            continue;
+          }
+          bmm.turnRight();
+        }              
+
+        }while(abs(delta) > getEps());
+        bmm.stop();
 }
