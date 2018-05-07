@@ -106,6 +106,8 @@
 #define COMPASS_VERTICAL_X_EAST     ( (COMPASS_EAST  << 6)  | (COMPASS_UP    << 3)  | COMPASS_SOUTH ) << 5
 #define COMPASS_VERTICAL_Y_WEST     ( (COMPASS_UP    << 6)  | (COMPASS_WEST  << 3)  | COMPASS_SOUTH ) << 5
 
+#define EPS 7.0
+
 class HMC5883L_Simple
 {
 	public:
@@ -164,7 +166,7 @@ class HMC5883L_Simple
     //bias[3] is the bias
     float bias[3] = {    -36.147,    -76.359,    24.904  };
     //min delta right and left side
-    float eps = 7.0;
+    float eps = EPS;
 
     
 	  void     Write(uint8_t address, uint8_t byte);

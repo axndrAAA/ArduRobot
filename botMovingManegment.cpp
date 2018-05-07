@@ -1,6 +1,7 @@
 #include <Arduino.h>
 #include <Wire.h>
 #include"botMovingManegment.h"
+#include"HMC5883L_Simple.h"
 
 BotMovingManegement::BotMovingManegement(){
     pinMode(dir2,OUTPUT);
@@ -10,9 +11,6 @@ BotMovingManegement::BotMovingManegement(){
     
 }
 
-BotMovingManegement::BotMovingManegement(HMC5883L_Simple & _compas):BotMovingManegement(){
-    compas = _compas;
-}
 BotMovingManegement::BotMovingManegement(float (*get_cur_ang)(void)):BotMovingManegement(){
     get_ang_func = get_cur_ang;
 }
@@ -76,16 +74,15 @@ void BotMovingManegement::setV(int _v){
 }
 
 float BotMovingManegement::getHeadingHQ(){
-    Serial.println("getHeadingHQ");
     float res = (*get_ang_func)();
     return res;
 }
 
 
 void BotMovingManegement::turnAngle(int new_angle){
-    float last_heading = compas.GetHeadingDegreesHQ();
+    float last_heading = getHeadingHQ();
   int delta = new_angle - last_heading;
-  if(abs(delta)<compas.getEps()){
+  if(abs(delta)<EPS){
     delta = 0;
     return;
   }
@@ -93,12 +90,12 @@ void BotMovingManegement::turnAngle(int new_angle){
 
     do{
         delay(500);      
-        last_heading = compas.GetHeadingDegreesHQ();
+        last_heading = getHeadingHQ();
       
         delta = new_angle - last_heading;
          Serial.print("delta: \t");
          Serial.println(delta);
-        if(abs(delta)<compas.getEps()){
+        if(abs(delta)<EPS){
             delta = 0;
             break;
         }
@@ -143,6 +140,6 @@ void BotMovingManegement::turnAngle(int new_angle){
           turnRight();
         }              
 
-        }while(abs(delta) > compas.getEps());
+        }while(abs(delta) > EPS);
         stop();
 }

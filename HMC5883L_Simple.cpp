@@ -302,6 +302,9 @@ float HMC5883L_Simple::GetHeadingDegreesHQ(){
 
   // calculate heading from the north and west magnetic axes
   last_heading = atan2(mag_Y, mag_X); 
+  
+  last_heading = last_heading - zero_heading*M_PI/180.0;  
+  
 
   // Correct for when signs are reversed.
   if (last_heading < 0)
@@ -313,7 +316,7 @@ float HMC5883L_Simple::GetHeadingDegreesHQ(){
 
   // Convert radians to degrees for readability.
   last_heading= last_heading * 180 / M_PI;
-  last_heading = last_heading - zero_heading;  
+  //last_heading = last_heading - zero_heading;  
   return last_heading;
 }
 
