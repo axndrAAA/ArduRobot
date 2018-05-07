@@ -8,21 +8,21 @@
 #define dir2 2//правые
 #define pwm2 5
 
-//PID поворота
 #define MAX_PWM_VAL 255
 #define MAX_PID_VAL 45
 #define Kp 0.5
-
 
 class BotMovingManegement{
 
     private:
         //скорость вращения двигателей
         int V = 200;
-        //компас
 
+        float (*get_ang_func)(void);//указатель на функцию получения текущего угла от компаса
+        
     public:
         BotMovingManegement();
+        BotMovingManegement(float (*get_cur_ang)(void));
         
 
         void turnLeft();
@@ -31,8 +31,9 @@ class BotMovingManegement{
         void stop();
         void goBackward();
         void setV(int _v);
-        
-    protected:
+
+        void turnAngle(int new_angle);
+        float getHeadingHQ();
                       
     
 };
