@@ -47,16 +47,15 @@
 #include "botMovingManegment.h"
 #include "HMC5883L_Simple.h"
 
-// Create a bot moving class
-BotMovingManegement bmm;
+
 // Create a compass
 HMC5883L_Simple Compass;
 float get_ang_func(){
   return Compass.GetHeadingDegreesHQ();
 }
-
+// Create a bot moving class
 BotMovingManegement bmm(&get_ang_func);
-//BotMovingManegement bmm(Compass);
+
 
 
 void setup()

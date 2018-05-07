@@ -24,7 +24,7 @@ void BotMovingManegement::turnLeft(){
     digitalWrite(dir3,HIGH);
     analogWrite (pwm2, V);
     analogWrite (pwm3, V); 
-    //Serial.println("left");    
+    Serial.println("left");    
 }
 
 
@@ -35,7 +35,7 @@ void BotMovingManegement::turnRight(){
     digitalWrite(dir3,LOW); 
     analogWrite (pwm2, V);
     analogWrite (pwm3, V);
-    //Serial.println("right");
+    Serial.println("right");
 }
 
 

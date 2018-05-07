@@ -114,7 +114,6 @@ class HMC5883L_Simple
 
     // Constructor
 	  HMC5883L_Simple();
-    HMC5883L_Simple(const BotMovingManegement &_bmm);
 
     // Configuration Methods
     void SetScale( uint16_t sampling_mode );
@@ -122,7 +121,6 @@ class HMC5883L_Simple
     void SetDeclination( int declination_degs , int declination_mins, char declination_dir );
     void SetSamplingMode( uint16_t sampling_mode );
     void setUpZeroHeading();
-    void turnByAngle(int new_angle);
     	  
     // Get a heading in degrees
     float GetHeadingDegrees();
@@ -159,9 +157,6 @@ class HMC5883L_Simple
       int Y;
       int Z;
     };
-
-    BotMovingManegement &bmm;
-
     
     //calibration_matrix[3][3] is the transformation matrix
     float M11 = 1.024, M12 = 0.024, M13 = -0.019,
