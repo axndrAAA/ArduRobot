@@ -110,6 +110,6 @@ void loop()
    float heading = Compass.GetHeadingDegreesHQ();
    Serial.print("Heading: \t");
    Serial.println( heading );   
-   //bmm.turnAngle(160);
+   bmm.turnAngle(160);
    delay(1000);
 }

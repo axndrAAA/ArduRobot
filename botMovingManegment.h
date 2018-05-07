@@ -8,12 +8,11 @@
 #define dir2 2//правые
 #define pwm2 5
 
-//PID поворота
 #define MAX_PWM_VAL 255
 #define MAX_PID_VAL 45
 #define Kp 0.5
 
-#include "HMC5883L_Simple.h"
+#include"HMC5883L_Simple.h"
 
 class BotMovingManegement{
 
@@ -21,10 +20,11 @@ class BotMovingManegement{
         //скорость вращения двигателей
         int V = 200;
         //компас
-
+        HMC5883L_Simple &compas;
     public:
         BotMovingManegement();
-        BotMovingManegement(const HMC5883L_Simple &_compas);
+        BotMovingManegement(const HMC5883L_Simple & _compas);
+        
 
         void turnLeft();
         void turnRight();
@@ -32,9 +32,10 @@ class BotMovingManegement{
         void stop();
         void goBackward();
         void setV(int _v);
+
         void turnAngle(int new_angle);
-    protected:
-        HMC5883L_Simple &compas;                
+
+                      
     
 };
 #endif
