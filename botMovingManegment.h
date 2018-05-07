@@ -21,9 +21,12 @@ class BotMovingManegement{
         int V = 200;
         //компас
         HMC5883L_Simple &compas;
+        float (*get_ang_func)(void);//указатель на функцию получения текущего угла
+        
     public:
         BotMovingManegement();
-        BotMovingManegement(const HMC5883L_Simple & _compas);
+        BotMovingManegement(HMC5883L_Simple & _compas);
+        BotMovingManegement(float (*get_cur_ang)(void));
         
 
         void turnLeft();
@@ -34,7 +37,7 @@ class BotMovingManegement{
         void setV(int _v);
 
         void turnAngle(int new_angle);
-
+        float getHeadingHQ();
                       
     
 };

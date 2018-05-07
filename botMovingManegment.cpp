@@ -7,10 +7,14 @@ BotMovingManegement::BotMovingManegement(){
     pinMode(dir3,OUTPUT);
     pinMode(pwm2,OUTPUT);
     pinMode(pwm3,OUTPUT);
+    
 }
 
-BotMovingManegement::BotMovingManegement(const HMC5883L_Simple & _compas):BotMovingManegement(){
+BotMovingManegement::BotMovingManegement(HMC5883L_Simple & _compas):BotMovingManegement(){
     compas = _compas;
+}
+BotMovingManegement::BotMovingManegement(float (*get_cur_ang)(void)):BotMovingManegement(){
+    get_ang_func = get_cur_ang;
 }
 
 
@@ -71,6 +75,13 @@ void BotMovingManegement::setV(int _v){
     V = _v;
 }
 
+float BotMovingManegement::getHeadingHQ(){
+    Serial.println("getHeadingHQ");
+    float res = (*get_ang_func)();
+    return res;
+}
+
+
 void BotMovingManegement::turnAngle(int new_angle){
     float last_heading = compas.GetHeadingDegreesHQ();
   int delta = new_angle - last_heading;
@@ -85,18 +96,18 @@ void BotMovingManegement::turnAngle(int new_angle){
         last_heading = compas.GetHeadingDegreesHQ();
       
         delta = new_angle - last_heading;
-        //  Serial.print("delta: \t");
-        //  Serial.println(delta);
+         Serial.print("delta: \t");
+         Serial.println(delta);
         if(abs(delta)<compas.getEps()){
             delta = 0;
             break;
         }
         pid_val = Kp*abs(delta);
-        // Serial.print("PID: \t");
-        // Serial.println(pid_val);
+        Serial.print("PID: \t");
+        Serial.println(pid_val);
         map(pid_val,0,MAX_PID_VAL,0,MAX_PWM_VAL);
-        // Serial.print("PWM: \t");
-        // Serial.println(pid_val);
+        Serial.print("PWM: \t");
+        Serial.println(pid_val);
         setV(pid_val);
 
 

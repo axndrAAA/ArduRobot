@@ -50,14 +50,17 @@
 
 // Create a compass
 HMC5883L_Simple Compass;
+float get_ang_func(){
+  return Compass.GetHeadingDegreesHQ();
+}
 
-BotMovingManegement bmm(Compass);
-
+BotMovingManegement bmm(&get_ang_func);
+//BotMovingManegement bmm(Compass);
 
 
 void setup()
 {
-  Serial.begin(9600);
+  Serial.begin(9600);  
   Wire.begin();
     
   // Magnetic Declination is the correction applied according to your present location
@@ -72,7 +75,7 @@ void setup()
   //   Dunedin     , 25° 8'  EAST
   //   Auckland    , 19° 30' EAST
   //    
-  //Compass.SetDeclination(23, 35, 'E');  
+  Compass.SetDeclination(23, 35, 'E');  
   
   // The device can operate in SINGLE (default) or CONTINUOUS mode
   //   SINGLE simply means that it takes a reading when you request one
@@ -100,16 +103,17 @@ void setup()
   //   COMPASS_VERTICAL_Y_WEST,    vertically mounted (wide) looking at the top side, when facing North the Y silkscreen arrow will point West  
   Compass.SetOrientation(COMPASS_HORIZONTAL_X_NORTH);
   Compass.setUpZeroHeading();
-
   Serial.println("Ready.");
+
 }
 
 // Our main program loop.
 void loop()
 {
    float heading = Compass.GetHeadingDegreesHQ();
+   //float heading = bmm.getHeadingHQ();
    Serial.print("Heading: \t");
    Serial.println( heading );   
-   bmm.turnAngle(160);
+   //bmm.turnAngle(160);
    delay(1000);
 }
