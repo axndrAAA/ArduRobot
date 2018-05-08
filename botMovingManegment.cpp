@@ -24,7 +24,7 @@ void BotMovingManegement::turnLeft(){
     digitalWrite(dir3,HIGH);
     analogWrite (pwm2, V);
     analogWrite (pwm3, V); 
-    Serial.println("left");    
+    //Serial.println("left");    
 }
 
 
@@ -35,37 +35,41 @@ void BotMovingManegement::turnRight(){
     digitalWrite(dir3,LOW); 
     analogWrite (pwm2, V);
     analogWrite (pwm3, V);
-    Serial.println("right");
+    //Serial.println("right");
 }
 
 
 
 void BotMovingManegement::goForward(){
-        analogWrite (pwm2, LOW);
-        analogWrite (pwm3, LOW);       
-        delay(5);        
-        digitalWrite(dir2,HIGH);
-        digitalWrite(dir3,HIGH);
-        analogWrite (pwm2, V);
-        analogWrite (pwm3, V);
+    analogWrite (pwm2, LOW);
+    analogWrite (pwm3, LOW);       
+    delay(5);        
+    digitalWrite(dir2,HIGH);
+    digitalWrite(dir3,HIGH);
+    analogWrite (pwm2, V);
+    analogWrite (pwm3, V);
+    //Serial.println("forward");        
         
 }
 
 
 void BotMovingManegement::stop(){
-        analogWrite (pwm2, LOW);
-        analogWrite (pwm3, LOW);
+    analogWrite (pwm2, LOW);
+    analogWrite (pwm3, LOW);
+    //Serial.println("stop");
 }
 
 
 void BotMovingManegement::goBackward(){
-        analogWrite (pwm2, LOW);
-        analogWrite (pwm3, LOW);
-        delay(5);
-        digitalWrite(dir2,LOW);
-        digitalWrite(dir3,LOW);
-        analogWrite (pwm2, V);
-        analogWrite (pwm3, V); 
+    analogWrite (pwm2, LOW);
+    analogWrite (pwm3, LOW);
+    delay(5);
+    digitalWrite(dir2,LOW);
+    digitalWrite(dir3,LOW);
+    analogWrite (pwm2, V);
+    analogWrite (pwm3, V);
+    //Serial.println("back");
+         
 }
 
 void BotMovingManegement::setV(int _v){
@@ -142,3 +146,74 @@ void BotMovingManegement::turnAngle(int new_angle){
         }while(abs(delta) > EPS);
         stop();
 }
+
+void BotMovingManegement::getMessage(String &command){
+    command = "";
+    if(Mode == 0){
+        command +="b1/";
+    }else{
+        command +="b2/";
+    }
+
+    command += "0/";
+
+    int azimut = getHeadingHQ();
+    command += String(azimut) + "/e";
+}
+
+
+void BotMovingManegement::executeModeCommand(const String &command){
+    //command = b1/112/e
+    String key = command.substring(0,2);
+    //Serial.println(key);
+    if(key.equals("b1")){
+        Mode = 0;
+        //Serial.println("Mode 0");        
+        mode1Execute(command);
+    }else if(key.equals("b2")){
+        Mode = 1;
+        //Serial.println("Mode 1");        
+        mode2Execute(command);      
+    }    
+
+}
+
+void BotMovingManegement::mode1Execute(const String &command){
+    String ch1 = command.substring(3,4);
+    String ch2 = command.substring(4,5);
+    String ch3 = command.substring(5,6);
+
+    int v = ch3.toInt();
+    V = map(v,0,9,0,MAX_PWM_VAL);
+    //сначала поворачиваем
+    if(!ch2.equals("2")){
+        if(ch2.equals("3")){
+            //поворот вправо 
+            turnRight();            
+          }
+         if(ch2.equals("1")){
+            //поворот влево 
+            turnLeft();        
+          }
+    }else{
+        //теперь движение назад/вперед
+        if(ch1.equals("1")){
+              //назад
+              goBackward();
+              return;              
+          }
+        if(ch1.equals("3")){
+              //вперед 
+              goForward();
+              return;
+        }
+        //если ниодно из условий не выполнено - остановка
+        stop();
+    }
+}
+
+void BotMovingManegement::mode2Execute(const String &command){
+
+}
+
+

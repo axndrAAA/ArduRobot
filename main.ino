@@ -1,119 +1,141 @@
-/*
- * 
- * Compass.ino - Example sketch for reading a heading from an HMC5883L triple axis magnetometer.
- * 
- * GY-273 Compass Module  ->  Arduino
- * VCC  -> VCC  (See Note Below)
- * GND  -> GND
- * SCL  -> A5/SCL, (Use Pin 21 on the Arduino Mega)
- * SDA  -> A4/SDA, (Use Pin 20 on the Arduino Mega)
- * DRDY -> Not Connected (in this example)
- * 
- * Voltage Note
- * ~~~~~~~~~~~~  
- * The GY-273 Board has a 3v3 Regulator on it, and the SDA/SCL are pulled up to that so it is OK to 
- * use with 5v Arduino's.
- * 
- * If you are using any other breakout, or the raw IC, you need to be using 3v3 to supply and signal!
- * 
- * Datasheet: http://goo.gl/w1criV
- * 
- * Copyright (C) 2014 James Sleeman
- * 
- * Permission is hereby granted, free of charge, to any person obtaining a 
- * copy of this software and associated documentation files (the "Software"), 
- * to deal in the Software without restriction, including without limitation 
- * the rights to use, copy, modify, merge, publish, distribute, sublicense, 
- * and/or sell copies of the Software, and to permit persons to whom the 
- * Software is furnished to do so, subject to the following conditions:
- * 
- * The above copyright notice and this permission notice shall be included in 
- * all copies or substantial portions of the Software.
- * 
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE 
- * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER 
- * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, 
- * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN 
- * THE SOFTWARE.
- * 
- * @author James Sleeman, http://sparks.gogo.co.nz/
- * @license MIT License
- * 
- */
 #include <Arduino.h>
 #include <Wire.h>
+#include <SoftwareSerial.h>
+
 #include "botMovingManegment.h"
 #include "HMC5883L_Simple.h"
+#include "ESP8266.h"
 
 
 // Create a compass
 HMC5883L_Simple Compass;
+//функця связи компаса и bmm
 float get_ang_func(){
   return Compass.GetHeadingDegreesHQ();
 }
-// Create a bot moving class
+
+//Создаем класс движения бота
 BotMovingManegement bmm(&get_ang_func);
 
+//параметры подключения к вафле и создания TCP-IP соединения
+#define SSID        "SVR-RobotAccess"
+#define PASSWORD    "RobotPassword"
+#define HOST_NAME   "192.168.137.1"
+#define HOST_PORT   (777)
 
+//сюда подключен esp8266
+SoftwareSerial wifiSerial(11,12);
+
+//создание wif 
+ESP8266 wifi(wifiSerial,9600);
+
+//таймаут ответа хоста (перезапуск TCP-соединения) в мсек
+#define TIMEOUT 10000
+
+//буфер принимаемых команд
+uint8_t buffer[128] = {0};
+
+//буфер формирования команды
+String command = "";
 
 void setup()
 {
-  Serial.begin(9600);  
+  //I2C для компаса
   Wire.begin();
-    
-  // Magnetic Declination is the correction applied according to your present location
-  // in order to get True North from Magnetic North, it varies from place to place.
-  // 
-  // The declination for your area can be obtained from http://www.magnetic-declination.com/
-  // Take the "Magnetic Declination" line that it gives you in the information, 
-  //
-  // Examples:
-  //   Christchurch, 23° 35' EAST
-  //   Wellington  , 22° 14' EAST
-  //   Dunedin     , 25° 8'  EAST
-  //   Auckland    , 19° 30' EAST
-  //    
+  //настройка компаса
   Compass.SetDeclination(23, 35, 'E');  
-  
-  // The device can operate in SINGLE (default) or CONTINUOUS mode
-  //   SINGLE simply means that it takes a reading when you request one
-  //   CONTINUOUS means that it is always taking readings
-  // for most purposes, SINGLE is what you want.
-  Compass.SetSamplingMode(COMPASS_SINGLE);
-  
-  // The scale can be adjusted to one of several levels, you can probably leave it at the default.
-  // Essentially this controls how sensitive the device is.
-  //   Options are 088, 130 (default), 190, 250, 400, 470, 560, 810
-  // Specify the option as COMPASS_SCALE_xxx
-  // Lower values are more sensitive, higher values are less sensitive.
-  // The default is probably just fine, it works for me.  If it seems very noisy
-  // (jumping around), incrase the scale to a higher one.
+  Compass.SetSamplingMode(COMPASS_SINGLE);  
   Compass.SetScale(COMPASS_SCALE_130);
-  
-  // The compass has 3 axes, but two of them must be close to parallel to the earth's surface to read it, 
-  // (we do not compensate for tilt, that's a complicated thing) - just like a real compass has a floating 
-  // needle you can imagine the digital compass does too.
-  //
-  // To allow you to mount the compass in different ways you can specify the orientation:
-  //   COMPASS_HORIZONTAL_X_NORTH (default), the compass is oriented horizontally, top-side up. when pointing North the X silkscreen arrow will point North
-  //   COMPASS_HORIZONTAL_Y_NORTH, top-side up, Y is the needle,when pointing North the Y silkscreen arrow will point North
-  //   COMPASS_VERTICAL_X_EAST,    vertically mounted (tall) looking at the top side, when facing North the X silkscreen arrow will point East
-  //   COMPASS_VERTICAL_Y_WEST,    vertically mounted (wide) looking at the top side, when facing North the Y silkscreen arrow will point West  
   Compass.SetOrientation(COMPASS_HORIZONTAL_X_NORTH);
   Compass.setUpZeroHeading();
-  Serial.println("Ready.");
 
+  //настройка вафли
+  //для отладки
+  Serial.begin(9600);
+  Serial.print("setup begin\r\n");
+  Serial.print("FW Version: ");
+  Serial.println(wifi.getVersion().c_str());
+
+  //переключение вайли в режим станции
+  if (wifi.setOprToStationSoftAP()) {
+    Serial.print("to station + softap ok\r\n");
+  } else {
+    Serial.print("to station + softap err\r\n");
+  }
+
+  //подключение к точке доступа
+  if (wifi.joinAP(SSID, PASSWORD)) {
+    Serial.print("Join AP success\r\n");
+    Serial.print("IP: ");       
+    Serial.println(wifi.getLocalIP().c_str());
+  } else {
+      Serial.print("Join AP failure\r\n");
+  }
+
+  //включаем одиночный режим (выключаем MUX-режим)
+  if (wifi.disableMUX()) {
+    Serial.print("single ok\r\n");
+  } else {
+    Serial.print("single err\r\n");
+  }
+
+  //создание TCP соединения
+  if (wifi.createTCP(HOST_NAME, HOST_PORT)) {
+    Serial.print("create tcp ok\r\n");
+  } else {
+    Serial.print("create tcp err\r\n");
+  }
+
+  Serial.println("Ready.");
+  digitalWrite(LED_BUILTIN, HIGH);
 }
 
 // Our main program loop.
 void loop()
 {
-   //float heading = Compass.GetHeadingDegreesHQ();
-   float heading = bmm.getHeadingHQ();
-   Serial.print("Heading: \t");
-   Serial.println( heading );   
-   bmm.turnAngle(250);
-   delay(1000);
+  //восстанавливаем соединение, если оно упало
+  if (wifi.createTCP(HOST_NAME, HOST_PORT)) {
+    Serial.print("create tcp ok\r\n");
+    digitalWrite(LED_BUILTIN, HIGH);    
+  } else {
+    Serial.print("create tcp err\r\n");
+    digitalWrite(LED_BUILTIN, LOW);    
+  }
+  
+  //читаем команду от хоста
+  uint32_t len = wifi.recv(buffer, sizeof(buffer), TIMEOUT);
+    
+    //выброс в Serial для отладки
+    if (len > 0) {
+        Serial.print("Received:[");
+        for(uint32_t i = 0; i < len; i++) {
+            Serial.print((char)buffer[i]);
+            command+=(char)buffer[i];
+        }
+        Serial.print("] ");
+        Serial.print(sizeof(buffer));
+        Serial.print(" ");
+        Serial.print(len);
+        Serial.print("\r\n");
+        bmm.executeModeCommand(command);
+
+        //получение строки-состояния для отправки на хост
+        bmm.getMessage(command);
+        Serial.println(command);
+
+        //отправка ответки на хост
+        wifi.send((const uint8_t*)command.c_str(), strlen(command.c_str()));
+
+        //сброс команды на исходную
+        command = "";
+    }
+
+
+
+
+  //   float heading = bmm.getHeadingHQ();
+  //  Serial.print("Heading: \t");
+  //  Serial.print( heading );   
+  //  bmm.turnAngle(250);
+   //delay(1000);
 }

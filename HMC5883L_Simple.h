@@ -143,7 +143,7 @@ class HMC5883L_Simple
     //previous measured heading in degr
     float prev_heading;
     unsigned long prev_measure_time;
-
+    
     float zero_heading;
 
     //max z-rotating speed
