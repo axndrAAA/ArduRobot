@@ -161,9 +161,31 @@ void BotMovingManegement::getMessage(String &command){
     command += String(azimut) + "/e";
 }
 
+void BotMovingManegement::getCoordFromComma(const String &command,int *coords){
+    //command mode2 = b2/XXX/YYY/XXXt/YYYt/e
+    int last_indx = 3;
+    int counter = 0;
+    String piece;
+    
+    //начинаем с 2, т.к. нужны только координаты
+      for (uint8_t i = last_indx; i < command.length()-1; i++) {
+        // Loop through each character and check if it's a comma
+        if (command.substring(i, i+1) == "/") {
+        	// Grab the piece from the last index up to the current position and store it
+        	piece = command.substring(last_indx, i);
+            //преобразовываем в int  и добавляем в выходной массив 
+            coords[counter] = piece.toInt();
+        	// Update the last position and add 1, so it starts from the next character
+        	last_indx = i + 1;
+        	// Increase the position in the array that we store into
+        	counter++;
+        }
+      }  
+}
+
 
 void BotMovingManegement::executeModeCommand(const String &command){
-    //command = b1/112/e
+    //command mode1 = b1/112/e
     String key = command.substring(0,2);
     //Serial.println(key);
     if(key.equals("b1")){
@@ -179,6 +201,8 @@ void BotMovingManegement::executeModeCommand(const String &command){
 }
 
 void BotMovingManegement::mode1Execute(const String &command){
+    //command = b1/112/e
+    
     String ch1 = command.substring(3,4);
     String ch2 = command.substring(4,5);
     String ch3 = command.substring(5,6);
@@ -213,7 +237,16 @@ void BotMovingManegement::mode1Execute(const String &command){
 }
 
 void BotMovingManegement::mode2Execute(const String &command){
+    //command mode2 = b2/X/Y/Xt/Yt/e
+    //где
+    //X,Y - текущие координаты бота (положительные числа [0,999])
+    //Xt,Yt - координаты точки назначения бота(положительные числа [0,999])
 
+    int coords[4];
+    getCoordFromComma(command,coords);
+
+
+    
 }
 
 

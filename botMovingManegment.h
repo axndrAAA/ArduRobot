@@ -21,7 +21,9 @@ class BotMovingManegement{
         float (*get_ang_func)(void);//указатель на функцию получения текущего угла от компаса
         
         void mode1Execute(const String &command);
-        void mode2Execute(const String &command);
+
+        void getCoordFromComma(const String &command,int *coords);
+        
     public:
         BotMovingManegement();
         BotMovingManegement(float (*get_cur_ang)(void));
@@ -40,9 +42,7 @@ class BotMovingManegement{
         void turnAngle(int new_angle);
 
         void executeModeCommand(const String &command);
+        void mode2Execute(const String &command);
 
-
-                      
-    
 };
 #endif
