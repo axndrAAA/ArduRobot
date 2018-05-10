@@ -105,7 +105,7 @@ void BotMovingManegement::turnAngle(int new_angle){
         pid_val = Kp*abs(delta);
         Serial.print("PID: \t");
         Serial.println(pid_val);
-        map(pid_val,0,MAX_PID_VAL,0,MAX_PWM_VAL);
+        map(pid_val,0,MAX_ANG_PID_VAL,0,MAX_PWM_VAL);
         Serial.print("PWM: \t");
         Serial.println(pid_val);
         setV(pid_val);
@@ -118,7 +118,7 @@ void BotMovingManegement::turnAngle(int new_angle){
               pid_val = Kp*abs(delta-360);
               // Serial.print("PID: \t");
               // Serial.println(pid_val);
-              map(pid_val,0,MAX_PID_VAL,0,MAX_PWM_VAL);
+              map(pid_val,0,MAX_ANG_PID_VAL,0,MAX_PWM_VAL);
               // Serial.print("PWM: \t");
               // Serial.println(pid_val);
               setV(pid_val);
@@ -133,7 +133,7 @@ void BotMovingManegement::turnAngle(int new_angle){
             pid_val = Kp*abs(delta-360);
             // Serial.print("PID: \t");
             // Serial.println(pid_val);
-            map(pid_val,0,MAX_PID_VAL,0,MAX_PWM_VAL);
+            map(pid_val,0,MAX_ANG_PID_VAL,0,MAX_PWM_VAL);
             // Serial.print("PWM: \t");
             // Serial.println(pid_val);
             setV(pid_val);
@@ -183,6 +183,29 @@ void BotMovingManegement::getCoordFromComma(const String &command,int *coords){
       }  
 }
 
+float BotMovingManegement::getVectAngle(float Xr,float Yr){    
+    //нормализаця
+    //модуль
+    float r_mod = sqrt(pow(Xr,2)+pow(Yr,2));
+    //нормализаця
+    Yr = (Yr)/r_mod;
+    Xr = (Xr)/r_mod;
+
+    //тангенс в радианах
+    float point_azim = atan2(Yr,Xr);
+      // Correct for when signs are reversed.
+    if (point_azim < 0)
+        point_azim += 2 * M_PI;
+
+    // Check for wrap due to addition of declination.
+    if (point_azim > 2 * M_PI)
+        point_azim -= 2 * M_PI;
+
+    //перевод в градусы
+    point_azim = point_azim*180.0/M_PI;
+    return point_azim;    
+}
+
 
 void BotMovingManegement::executeModeCommand(const String &command){
     //command mode1 = b1/112/e
@@ -202,7 +225,7 @@ void BotMovingManegement::executeModeCommand(const String &command){
 
 void BotMovingManegement::mode1Execute(const String &command){
     //command = b1/112/e
-    
+    stop();
     String ch1 = command.substring(3,4);
     String ch2 = command.substring(4,5);
     String ch3 = command.substring(5,6);
@@ -243,10 +266,48 @@ void BotMovingManegement::mode2Execute(const String &command){
     //Xt,Yt - координаты точки назначения бота(положительные числа [0,999])
 
     int coords[4];
+    //X[0] = X
+    //X[1] = Y
+    //X[2] = Xt
+    //X[3] = Yt
+
+    //парсинг строки на координаты
     getCoordFromComma(command,coords);
 
+    //координаты радиус-вектора точки назначения
+    float Xr = coords[2] - coords[0];
+    float Yr = coords[3] - coords[1];
 
-    
+    //получение азимута точки
+    float point_azim = getVectAngle(Xr,Yr);
+
+    //debug
+    Serial.println(point_azim);    
+
+    //разворот на точку
+    //debug
+    turnAngle(point_azim);
+
+    //вычисление расстояния до точки назначения
+    float r_mod = sqrt(pow(Xr,2)+pow(Yr,2));
+
+    if(r_mod >= coordEps){
+        //мы на в точке - поэтому разваорачиваемся и едем вперед
+
+        //внутри есть отсекатель по минимальной ошибке,
+        // поэтому повторный вызов функции разворота ни на что не повлияет
+        turnAngle(point_azim);
+
+        //Выставляем скорость пропорциональную расстоянию от бота до точки
+        map(V,0,MAX_COORD_PID_VAL,0,MAX_PWM_VAL);  
+
+        //едем вперед
+        goForward();
+
+    }else{
+        //прибыли
+        stop();
+    }
 }
 
 

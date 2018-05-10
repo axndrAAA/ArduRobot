@@ -9,13 +9,16 @@
 #define pwm2 5
 
 #define MAX_PWM_VAL 255
-#define MAX_PID_VAL 45
+#define MAX_ANG_PID_VAL 180
+#define MAX_COORD_PID_VAL 200
+
 #define Kp 0.5
+#define coordEps 30
+
 
 class BotMovingManegement{
 
     private:
-        
         int V = 200;//скорость вращения двигателей
         byte Mode = 0;//указатель режима
         float (*get_ang_func)(void);//указатель на функцию получения текущего угла от компаса
@@ -23,6 +26,7 @@ class BotMovingManegement{
         void mode1Execute(const String &command);
 
         void getCoordFromComma(const String &command,int *coords);
+        float getVectAngle(float Xr,float Yr);
         
     public:
         BotMovingManegement();
