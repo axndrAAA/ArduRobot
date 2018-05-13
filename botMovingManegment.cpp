@@ -42,10 +42,10 @@ void BotMovingManegement::turnRight(){
 
 void BotMovingManegement::goForward(){
     analogWrite (pwm2, LOW);
-    analogWrite (pwm3, LOW);       
-    delay(5);        
-    digitalWrite(dir2,HIGH);
-    digitalWrite(dir3,HIGH);
+    analogWrite (pwm3, LOW);
+    delay(5);
+    digitalWrite(dir2,LOW);
+    digitalWrite(dir3,LOW);
     analogWrite (pwm2, V);
     analogWrite (pwm3, V);
     //Serial.println("forward");        
@@ -61,13 +61,13 @@ void BotMovingManegement::stop(){
 
 
 void BotMovingManegement::goBackward(){
-    analogWrite (pwm2, LOW);
-    analogWrite (pwm3, LOW);
-    delay(5);
-    digitalWrite(dir2,LOW);
-    digitalWrite(dir3,LOW);
-    analogWrite (pwm2, V);
-    analogWrite (pwm3, V);
+        analogWrite (pwm2, LOW);
+        analogWrite (pwm3, LOW);       
+        delay(5);        
+        digitalWrite(dir2,HIGH);
+        digitalWrite(dir3,HIGH);
+        analogWrite (pwm2, V);
+        analogWrite (pwm3, V);
     //Serial.println("back");
          
 }
@@ -75,6 +75,10 @@ void BotMovingManegement::goBackward(){
 void BotMovingManegement::setV(int _v){
     if(_v < MIN_V_PWM){
         V = MIN_V_PWM;        
+        return;
+    }
+    if(_v > MAX_PWM_VAL){
+        V = MAX_PWM_VAL;
         return;
     }
     V = _v;
@@ -96,7 +100,7 @@ void BotMovingManegement::turnAngle(int new_angle){
   float pid_val = Kp*delta;
 
     do{
-        delay(500);      
+        //delay(500);      
         last_heading = getHeadingHQ();
       
         delta = new_angle - last_heading;
@@ -286,6 +290,7 @@ void BotMovingManegement::mode2Execute(const String &command){
     float point_azim = getVectAngle(Xr,Yr);
 
     //debug
+    Serial.print("ang: ");    
     Serial.println(point_azim);    
 
     //разворот на точку
@@ -295,6 +300,9 @@ void BotMovingManegement::mode2Execute(const String &command){
     //вычисление расстояния до точки назначения
     float r_mod = sqrt(pow(Xr,2)+pow(Yr,2));
 
+    Serial.print("r_mod: ");    
+    Serial.println(r_mod);  
+
     if(r_mod >= coordEps){
         //мы на в точке - поэтому разваорачиваемся и едем вперед
 
@@ -303,10 +311,14 @@ void BotMovingManegement::mode2Execute(const String &command){
         turnAngle(point_azim);
 
         //Выставляем скорость пропорциональную расстоянию от бота до точки
-        map(V,0,MAX_COORD_PID_VAL,0,MAX_PWM_VAL);  
+        // map(r_mod,0,MAX_COORD_PID_VAL,0,MAX_PWM_VAL);  
+        setV(FORWARD_V);
+        Serial.print("Speed: ");
+        Serial.println(V);
 
         //едем вперед
-        goForward();
+        //goForward();
+        Serial.println("едем");
 
     }else{
         //прибыли

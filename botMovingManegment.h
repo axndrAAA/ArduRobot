@@ -8,15 +8,14 @@
 #define dir2 2//правые
 #define pwm2 5
 
-#define MAX_PWM_VAL 255
-#define MAX_ANG_PID_VAL 90
-#define MAX_COORD_PID_VAL 200
-#define MIN_V_PWM 40
+#define MAX_PWM_VAL 150
+#define MAX_ANG_PID_VAL 180
+#define MIN_V_PWM 30
 
-#define Kp 0.45
+#define Kp 0.25
 #define coordEps 30
 #define ANG_EPS 10
-
+#define FORWARD_V 100
 
 class BotMovingManegement{
 
