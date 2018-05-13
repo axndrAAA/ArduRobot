@@ -73,6 +73,10 @@ void BotMovingManegement::goBackward(){
 }
 
 void BotMovingManegement::setV(int _v){
+    if(_v < MIN_V_PWM){
+        V = MIN_V_PWM;        
+        return;
+    }
     V = _v;
 }
 
@@ -98,7 +102,7 @@ void BotMovingManegement::turnAngle(int new_angle){
         delta = new_angle - last_heading;
          Serial.print("delta: \t");
          Serial.println(delta);
-        if(abs(delta)<EPS){
+        if(abs(delta)<ANG_EPS){
             delta = 0;
             break;
         }

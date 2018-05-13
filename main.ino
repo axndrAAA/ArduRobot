@@ -96,7 +96,8 @@ void loop()
 
   
 
-  bmm.executeModeCommand("b2/100/20/20/100/e");
+  //bmm.executeModeCommand("b2/100/20/20/100/e");
+  bmm.turnAngle(90);
 
   delay(1500);
 
