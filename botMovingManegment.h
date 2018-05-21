@@ -8,7 +8,7 @@
 #define dir2 2//правые
 #define pwm2 5
 
-#define MAX_PWM_VAL 150
+#define MAX_PWM_VAL 100
 #define MAX_ANG_PID_VAL 180
 #define MIN_V_PWM 30
 

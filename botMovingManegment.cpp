@@ -104,18 +104,18 @@ void BotMovingManegement::turnAngle(int new_angle){
         last_heading = getHeadingHQ();
       
         delta = new_angle - last_heading;
-         Serial.print("delta: \t");
-         Serial.println(delta);
+        //  Serial.print("delta: \t");
+        //  Serial.println(delta);
         if(abs(delta)<ANG_EPS){
             delta = 0;
             break;
         }
         pid_val = Kp*abs(delta);
-        Serial.print("PID: \t");
-        Serial.println(pid_val);
+        // Serial.print("PID: \t");
+        // Serial.println(pid_val);
         map(pid_val,0,MAX_ANG_PID_VAL,0,MAX_PWM_VAL);
-        Serial.print("PWM: \t");
-        Serial.println(pid_val);
+        // Serial.print("PWM: \t");
+        // Serial.println(pid_val);
         setV(pid_val);
 
 
@@ -165,7 +165,9 @@ void BotMovingManegement::getMessage(String &command){
 
     command += "0/";
 
-    int azimut = getHeadingHQ();
+    //int azimut = getHeadingHQ();
+    int azimut = 180;
+
     command += String(azimut) + "/e";
 }
 
@@ -272,7 +274,7 @@ void BotMovingManegement::mode2Execute(const String &command){
     //где
     //X,Y - текущие координаты бота (положительные числа [0,999])
     //Xt,Yt - координаты точки назначения бота(положительные числа [0,999])
-
+    Serial.println(command);
     int coords[4];
     //X[0] = X
     //X[1] = Y
@@ -302,7 +304,7 @@ void BotMovingManegement::mode2Execute(const String &command){
 
     Serial.print("r_mod: ");    
     Serial.println(r_mod);  
-
+    
     if(r_mod >= coordEps){
         //мы на в точке - поэтому разваорачиваемся и едем вперед
 

@@ -52,39 +52,39 @@ void setup()
   // //настройка вафли
   // //для отладки
   Serial.begin(9600);
-  // Serial.print("setup begin\r\n");
-  // Serial.print("FW Version: ");
-  // Serial.println(wifi.getVersion().c_str());
+  Serial.print("setup begin\r\n");
+  Serial.print("FW Version: ");
+  Serial.println(wifi.getVersion().c_str());
 
-  // //переключение вайли в режим станции
-  // if (wifi.setOprToStationSoftAP()) {
-  //   Serial.print("to station + softap ok\r\n");
-  // } else {
-  //   Serial.print("to station + softap err\r\n");
-  // }
+  //переключение вайли в режим станции
+  if (wifi.setOprToStationSoftAP()) {
+    Serial.print("to station + softap ok\r\n");
+  } else {
+    Serial.print("to station + softap err\r\n");
+  }
 
-  // //подключение к точке доступа
-  // if (wifi.joinAP(SSID, PASSWORD)) {
-  //   Serial.print("Join AP success\r\n");
-  //   Serial.print("IP: ");
-  //   Serial.println(wifi.getLocalIP().c_str());
-  // } else {
-  //     Serial.print("Join AP failure\r\n");
-  // }
+  //подключение к точке доступа
+  if (wifi.joinAP(SSID, PASSWORD)) {
+    Serial.print("Join AP success\r\n");
+    Serial.print("IP: ");
+    Serial.println(wifi.getLocalIP().c_str());
+  } else {
+      Serial.print("Join AP failure\r\n");
+  }
 
-  // //включаем одиночный режим (выключаем MUX-режим)
-  // if (wifi.disableMUX()) {
-  //   Serial.print("single ok\r\n");
-  // } else {
-  //   Serial.print("single err\r\n");
-  // }
+  //включаем одиночный режим (выключаем MUX-режим)
+  if (wifi.disableMUX()) {
+    Serial.print("single ok\r\n");
+  } else {
+    Serial.print("single err\r\n");
+  }
 
-  // //создание TCP соединения
-  // if (wifi.createTCP(HOST_NAME, HOST_PORT)) {
-  //   Serial.print("create tcp ok\r\n");
-  // } else {
-  //   Serial.print("create tcp err\r\n");
-  // }
+  //создание TCP соединения
+  if (wifi.createTCP(HOST_NAME, HOST_PORT)) {
+    Serial.print("create tcp ok\r\n");
+  } else {
+    Serial.print("create tcp err\r\n");
+  }
 
   Serial.println("Ready.");
   digitalWrite(LED_BUILTIN, HIGH);
@@ -96,12 +96,12 @@ void loop()
 
   
 
-  bmm.executeModeCommand("b2/0/0/-100/100/e");
-  //bmm.turnAngle(90);
+  // bmm.executeModeCommand("b2/0/0/-100/100/e");
+  // //bmm.turnAngle(90);
 
-  delay(1500);
+  // delay(1500);
 
-  // //восстанавливаем соединение, если оно упало
+  //восстанавливаем соединение, если оно упало
   // if (wifi.createTCP(HOST_NAME, HOST_PORT)) {
   //   Serial.print("create tcp ok\r\n");
   //   digitalWrite(LED_BUILTIN, HIGH);
@@ -110,33 +110,36 @@ void loop()
   //   digitalWrite(LED_BUILTIN, LOW);
   // }
 
-  // //читаем команду от хоста
-  // uint32_t len = wifi.recv(buffer, sizeof(buffer), TIMEOUT);
+  //читаем команду от хоста
+  uint32_t len = wifi.recv(buffer, sizeof(buffer), TIMEOUT);
 
-  //   //выброс в Serial для отладки
-  //   if (len > 0) {
-  //       //Serial.print("Received:[");
-  //       for(uint32_t i = 0; i < len; i++) {
-  //           //Serial.print((char)buffer[i]);
-  //           command+=(char)buffer[i];
-  //       }
-  //       // Serial.print("] ");
-  //       // Serial.print(sizeof(buffer));
-  //       // Serial.print(" ");
-  //       // Serial.print(len);
-  //       // Serial.print("\r\n");
-  //       bmm.executeModeCommand(command);
+    //выброс в Serial для отладки
+    if (len > 0) {
+        //Serial.print("Received:[");
+        for(uint32_t i = 0; i < len; i++) {
+            //Serial.print((char)buffer[i]);
+            command+=(char)buffer[i];
+        }
+        // Serial.print("] ");
+        // Serial.print(sizeof(buffer));
+        // Serial.print(" ");
+        // Serial.print(len);
+        // Serial.print("\r\n");
+        //Serial.println(command);
+        bmm.executeModeCommand(command);
 
-  //       //получение строки-состояния для отправки на хост
-  //       bmm.getMessage(command);
-  //       // Serial.println(command);
+        //получение строки-состояния для отправки на хост
+        bmm.getMessage(command);
+        // Serial.println(command);
+        
+        
+        //отправка ответки на хост
+        wifi.send((const uint8_t*)command.c_str(), strlen(command.c_str()));
 
-  //       //отправка ответки на хост
-  //       wifi.send((const uint8_t*)command.c_str(), strlen(command.c_str()));
-
-  //       //сброс команды на исходную
-  //       command = "";
-  //   }
+        //сброс команды на исходную
+        command = "";
+        delay(70);
+    }
 
 
 
