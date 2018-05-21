@@ -38,6 +38,12 @@ uint8_t buffer[128] = {0};
 //буфер формирования команды
 String command = "";
 
+//счетчик циклов для проверки состояния соединения
+unsigned loopCounter = 0;
+
+//каждые MAX_REF_TCP_COUTER циклов будет происходить попытка перезапуска соединения
+#define MAX_REF_TCP_COUTER 650;
+
 void setup()
 {
   //I2C для компаса
@@ -102,13 +108,16 @@ void loop()
   // delay(1500);
 
   //восстанавливаем соединение, если оно упало
-  // if (wifi.createTCP(HOST_NAME, HOST_PORT)) {
-  //   Serial.print("create tcp ok\r\n");
-  //   digitalWrite(LED_BUILTIN, HIGH);
-  // } else {
-  //   Serial.print("create tcp err\r\n");
-  //   digitalWrite(LED_BUILTIN, LOW);
-  // }
+  if(loopCounter > MAX_REF_TCP_COUTER){
+      if (wifi.createTCP(HOST_NAME, HOST_PORT)) {
+          Serial.print("create tcp ok\r\n");
+          digitalWrite(LED_BUILTIN, HIGH);
+      }else {
+          Serial.print("create tcp err\r\n");
+          digitalWrite(LED_BUILTIN, LOW);
+      }
+      loopCounter = 0;
+  }
 
   //читаем команду от хоста
   uint32_t len = wifi.recv(buffer, sizeof(buffer), TIMEOUT);
@@ -138,15 +147,12 @@ void loop()
 
         //сброс команды на исходную
         command = "";
-        delay(70);
     }
 
 
 
 
-  //   float heading = bmm.getHeadingHQ();
-  //  Serial.print("Heading: \t");
-  //  Serial.print( heading );
-  //  bmm.turnAngle(250);
-   //delay(1000);
+  delay(70);
+  loopCounter++;
+
 }

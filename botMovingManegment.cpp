@@ -319,7 +319,7 @@ void BotMovingManegement::mode2Execute(const String &command){
         Serial.println(V);
 
         //едем вперед
-        //goForward();
+        goForward();
         Serial.println("едем");
 
     }else{
