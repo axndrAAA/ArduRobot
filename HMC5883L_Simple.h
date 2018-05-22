@@ -127,7 +127,8 @@ class HMC5883L_Simple
     float GetHeadingDegreesHQ();
     float getOmegaZ();
     float getEps();
-
+    float getZeroHeading();
+    void setZeroHeading(float newZero);
 
 
   private:

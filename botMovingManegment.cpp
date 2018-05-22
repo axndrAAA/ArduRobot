@@ -242,6 +242,7 @@ void BotMovingManegement::mode1Execute(const String &command){
 
     int v = ch3.toInt();
     V = map(v,0,9,0,MAX_PWM_VAL);
+    //Serial.println(V);
     //сначала поворачиваем
     if(!ch2.equals("2")){
         if(ch2.equals("3")){
@@ -320,11 +321,13 @@ void BotMovingManegement::mode2Execute(const String &command){
 
         //едем вперед
         goForward();
-        Serial.println("едем");
+        Serial.println("goForward");
 
     }else{
         //прибыли
         stop();
+        Serial.println("bot has reched its final destination.");
+        
     }
 }
 

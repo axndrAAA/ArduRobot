@@ -351,3 +351,10 @@ float HMC5883L_Simple::getEps(){
   return eps;
 }
 
+float HMC5883L_Simple::getZeroHeading(){
+  return zero_heading;
+}
+
+void HMC5883L_Simple::setZeroHeading(float newZero){
+  zero_heading = newZero;
+}

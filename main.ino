@@ -9,6 +9,10 @@
 
 // Create a compass
 HMC5883L_Simple Compass;
+
+//нуль компаса(направление на север в аудитории)
+#define COMPASS_ZERO 315
+
 //функця связи компаса и bmm
 float get_ang_func(){
   return Compass.GetHeadingDegreesHQ();
@@ -42,7 +46,7 @@ String command = "";
 unsigned loopCounter = 0;
 
 //каждые MAX_REF_TCP_COUTER циклов будет происходить попытка перезапуска соединения
-#define MAX_REF_TCP_COUTER 650;
+#define MAX_REF_TCP_COUTER 650
 
 void setup()
 {
@@ -53,7 +57,8 @@ void setup()
   Compass.SetSamplingMode(COMPASS_SINGLE);
   Compass.SetScale(COMPASS_SCALE_130);
   Compass.SetOrientation(COMPASS_HORIZONTAL_X_NORTH);
-  Compass.setUpZeroHeading();
+  //Compass.setUpZeroHeading();
+  Compass.setZeroHeading(COMPASS_ZERO);
 
   // //настройка вафли
   // //для отладки
@@ -91,6 +96,7 @@ void setup()
   } else {
     Serial.print("create tcp err\r\n");
   }
+  
 
   Serial.println("Ready.");
   digitalWrite(LED_BUILTIN, HIGH);
@@ -153,6 +159,6 @@ void loop()
 
 
   delay(70);
-  loopCounter++;
+  //loopCounter++;
 
 }
