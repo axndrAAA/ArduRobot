@@ -298,7 +298,7 @@ void BotMovingManegement::mode2Execute(const String &command){
 
     //разворот на точку
     //debug
-    turnAngle(point_azim);
+    //turnAngle(point_azim);
 
     //вычисление расстояния до точки назначения
     float r_mod = sqrt(pow(Xr,2)+pow(Yr,2));

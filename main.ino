@@ -24,7 +24,7 @@ BotMovingManegement bmm(&get_ang_func);
 //параметры подключения к вафле и создания TCP-IP соединения
 #define SSID        "SVR-RobotAccess"
 #define PASSWORD    "RobotPassword"
-#define HOST_NAME   "192.168.137.1"
+#define HOST_NAME   "192.168.173.1"
 #define HOST_PORT   (777)
 
 //сюда подключен esp8266
@@ -158,7 +158,7 @@ void loop()
 
 
 
-  delay(70);
+  delay(15);//70 30 20
   //loopCounter++;
 
 }

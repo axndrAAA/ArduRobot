@@ -14,8 +14,8 @@
 
 #define Kp 0.25
 #define coordEps 30
-#define ANG_EPS 10
-#define FORWARD_V 32
+#define ANG_EPS 5
+#define FORWARD_V 35
 
 class BotMovingManegement{
 
