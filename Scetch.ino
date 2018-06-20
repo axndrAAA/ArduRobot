@@ -34,7 +34,7 @@ SoftwareSerial wifiSerial(11,12);
 ESP8266 wifi(wifiSerial,9600);
 
 //таймаут ответа хоста (перезапуск TCP-соединения) в мсек
-#define TIMEOUT 10000
+#define TIMEOUT 2000
 
 //буфер принимаемых команд
 uint8_t buffer[128] = {0};
@@ -105,8 +105,9 @@ void setup()
 // Our main program loop.
 void loop()
 {
-  // Serial.println(Compass.GetHeadingDegreesHQ());
-  // delay(500);
+
+  
+
   // bmm.executeModeCommand("b2/0/0/-100/100/e");
   // //bmm.turnAngle(90);
 
@@ -127,19 +128,14 @@ void loop()
   //читаем команду от хоста
   uint32_t len = wifi.recv(buffer, sizeof(buffer), TIMEOUT);
 
-    //выброс в Serial для отладки
     if (len > 0) {
         //Serial.print("Received:[");
         for(uint32_t i = 0; i < len; i++) {
             //Serial.print((char)buffer[i]);
             command+=(char)buffer[i];
         }
-        // Serial.print("] ");
-        // Serial.print(sizeof(buffer));
-        // Serial.print(" ");
-        // Serial.print(len);
-        // Serial.print("\r\n");
-        //Serial.println(command);
+
+        //исполнение полученной команды
         bmm.executeModeCommand(command);
 
         //получение строки-состояния для отправки на хост
@@ -152,12 +148,28 @@ void loop()
 
         //сброс команды на исходную
         command = "";
+    }else{
+      if(len  == -2){
+      ///получен код ошибки - превышен TIMEOUT. Поэтому предпринимаем попытку восстановления соединения
+      Serial.println("Host TIMEOUT. Recovering TCP connection...");
+          //убиваем соединение со стороны клиента
+          wifi.releaseTCP();
+          //создаем заново
+          if (wifi.createTCP(HOST_NAME, HOST_PORT)) {
+              Serial.print("create tcp ok\r\n");
+              digitalWrite(LED_BUILTIN, HIGH);
+          }else {
+              Serial.print("create tcp err\r\n");
+              digitalWrite(LED_BUILTIN, LOW);
+          }
+        
+      }
     }
 
 
 
 
   delay(15);//70 30 20
-  loopCounter++;
+  //loopCounter++;
 
 }
