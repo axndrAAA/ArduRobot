@@ -114,16 +114,16 @@ void loop()
   // delay(1500);
 
   //восстанавливаем соединение, если оно упало
-  if(loopCounter > MAX_REF_TCP_COUTER){
-      if (wifi.createTCP(HOST_NAME, HOST_PORT)) {
-          Serial.print("create tcp ok\r\n");
-          digitalWrite(LED_BUILTIN, HIGH);
-      }else {
-          Serial.print("create tcp err\r\n");
-          digitalWrite(LED_BUILTIN, LOW);
-      }
-      loopCounter = 0;
-  }
+  // if(loopCounter > MAX_REF_TCP_COUTER){
+  //     if (wifi.createTCP(HOST_NAME, HOST_PORT)) {
+  //         Serial.print("create tcp ok\r\n");
+  //         digitalWrite(LED_BUILTIN, HIGH);
+  //     }else {
+  //         Serial.print("create tcp err\r\n");
+  //         digitalWrite(LED_BUILTIN, LOW);
+  //     }
+  //     loopCounter = 0;
+  // }
 
   //читаем команду от хоста
   uint32_t len = wifi.recv(buffer, sizeof(buffer), TIMEOUT);
@@ -140,20 +140,19 @@ void loop()
 
         //получение строки-состояния для отправки на хост
         bmm.getMessage(command);
-        // Serial.println(command);
-        
+        // Serial.println(command);       
         
         //отправка ответки на хост
         wifi.send((const uint8_t*)command.c_str(), strlen(command.c_str()));
 
         //сброс команды на исходную
         command = "";
-    }else{
-      if(len  == -2){
+    }
+    if(len  == 404){
       ///получен код ошибки - превышен TIMEOUT. Поэтому предпринимаем попытку восстановления соединения
       Serial.println("Host TIMEOUT. Recovering TCP connection...");
           //убиваем соединение со стороны клиента
-          wifi.releaseTCP();
+        if(wifi.releaseTCP()){
           //создаем заново
           if (wifi.createTCP(HOST_NAME, HOST_PORT)) {
               Serial.print("create tcp ok\r\n");
@@ -162,14 +161,12 @@ void loop()
               Serial.print("create tcp err\r\n");
               digitalWrite(LED_BUILTIN, LOW);
           }
+        }else{
+          Serial.println("Err 404 is in use.");
+        }
+
         
       }
-    }
-
-
-
-
+    
   delay(15);//70 30 20
-  //loopCounter++;
-
 }
