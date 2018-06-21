@@ -160,11 +160,11 @@ class HMC5883L_Simple
     };
     
     //calibration_matrix[3][3] is the transformation matrix
-    float M11 = 1.024, M12 = 0.024, M13 = -0.019,
-         M21 = 0.031, M22 = 1.049, M23 = -0.055,
-         M31 = 0.08,  M32 = 0.015, M33 = 1.118;
+  float M11 = 1.098, M12 = 0.084, M13 = 0.012,
+         M21 = 0.1, M22 = 1.085, M23 = -0.016,
+         M31 = 0.047,  M32 = 0.022, M33 = 1.171;
     //bias[3] is the bias
-    float bias[3] = {    -36.147,    -76.359,    24.904  };
+    float bias[3] = {        -28.822, -120.301, -71.558  };
     //min delta right and left side
     float eps = EPS;
 
