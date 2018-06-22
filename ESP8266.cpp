@@ -371,7 +371,7 @@ uint32_t ESP8266::recvPkg(uint8_t *buffer, uint32_t buffer_size, uint32_t *data_
             }
         }
     }
-    return 404;//код ошибки - истек срок ожидания от хоста TIMEUOT
+    return 0;//код ошибки 404 - истек срок ожидания от хоста TIMEUOT
 }
 
 void ESP8266::rx_empty(void) 

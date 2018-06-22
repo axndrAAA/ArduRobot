@@ -113,27 +113,42 @@ void loop()
 
   // delay(1500);
 
-  //восстанавливаем соединение, если оно упало
-  // if(loopCounter > MAX_REF_TCP_COUTER){
-  //     if (wifi.createTCP(HOST_NAME, HOST_PORT)) {
-  //         Serial.print("create tcp ok\r\n");
-  //         digitalWrite(LED_BUILTIN, HIGH);
-  //     }else {
-  //         Serial.print("create tcp err\r\n");
-  //         digitalWrite(LED_BUILTIN, LOW);
-  //     }
-  //     loopCounter = 0;
-  // }
+    //получение строки-состояния для отправки на хост
+    bmm.getMessage(command);     
+        
+    //пробуем отправить запрос на хост
+    bool sendStat = wifi.send((const uint8_t*)command.c_str(), strlen(command.c_str()));
+
+    //если 0 - скорее всего упало соединение. Пробуем переподключиться
+    if(!sendStat){
+      Serial.println("Connection lost. Recovering TCP connection...");
+      
+      //восстанавливаем
+      digitalWrite(LED_BUILTIN, LOW);
+      
+      if (wifi.createTCP(HOST_NAME, HOST_PORT)) {
+          Serial.print("create tcp ok\r\n");
+          digitalWrite(LED_BUILTIN, HIGH);
+        }else {
+          Serial.print("create tcp err\r\n");
+          digitalWrite(LED_BUILTIN, LOW);
+        }
+    }
+
+        //сброс команды на исходную
+        command = "";
 
   //читаем команду от хоста
   uint32_t len = wifi.recv(buffer, sizeof(buffer), TIMEOUT);
 
     if (len > 0) {
-        //Serial.print("Received:[");
+        Serial.print("Received:[");
+        //Serial.println(len);
         for(uint32_t i = 0; i < len; i++) {
-            //Serial.print((char)buffer[i]);
+            Serial.print((char)buffer[i]);
             command+=(char)buffer[i];
         }
+        Serial.println("]");
 
         //исполнение полученной команды
         bmm.executeModeCommand(command);
@@ -148,25 +163,6 @@ void loop()
         //сброс команды на исходную
         command = "";
     }
-    if(len  == 404){
-      ///получен код ошибки - превышен TIMEOUT. Поэтому предпринимаем попытку восстановления соединения
-      Serial.println("Host TIMEOUT. Recovering TCP connection...");
-          //убиваем соединение со стороны клиента
-        if(wifi.releaseTCP()){
-          //создаем заново
-          if (wifi.createTCP(HOST_NAME, HOST_PORT)) {
-              Serial.print("create tcp ok\r\n");
-              digitalWrite(LED_BUILTIN, HIGH);
-          }else {
-              Serial.print("create tcp err\r\n");
-              digitalWrite(LED_BUILTIN, LOW);
-          }
-        }else{
-          Serial.println("Err 404 is in use.");
-        }
-
-        
-      }
     
-  delay(15);//70 30 20
+  //delay(15);//70 30 20
 }
